@@ -50,38 +50,6 @@ StreamTeamDeck.exe hangup    # Hang up the call
    ```
    (Replace `mute` with `camera`, `hand`, or `hangup` for other buttons)
 
-### Method 2: Using Batch Files (Recommended)
-
-Create batch files for each command:
-
-**mute.bat:**
-```cmd
-@echo off
-"C:\path\to\StreamTeamDeck.exe" mute
-```
-
-**camera.bat:**
-```cmd
-@echo off
-"C:\path\to\StreamTeamDeck.exe" camera
-```
-
-**hand.bat:**
-```cmd
-@echo off
-"C:\path\to\StreamTeamDeck.exe" hand
-```
-
-**hangup.bat:**
-```cmd
-@echo off
-"C:\path\to\StreamTeamDeck.exe" hangup
-```
-
-Then in Stream Deck:
-1. Drag **"System → Open"** to a button
-2. Point to the respective `.bat` file
-3. Customize the button icon and title
 
 ## How It Works
 
@@ -106,20 +74,6 @@ The app includes retry logic and restores focus to the previously active window 
    ```
 3. Verify the action occurs in Teams
 
-## Troubleshooting
-
-**Command prompt window appears:**
-- Ensure the project file uses `<OutputType>WinExe</OutputType>` (not `Exe`)
-
-**Commands not working:**
-- Make sure Microsoft Teams is running
-- Verify you're in an active meeting
-- Check that Teams keyboard shortcuts are enabled in Teams settings
-
-**Stream Deck button not responding:**
-- Verify the path to the executable is correct
-- Use absolute paths, not relative paths
-- Try the batch file method if direct execution fails
 
 ## Technical Details
 
@@ -130,8 +84,11 @@ The app includes retry logic and restores focus to the previously active window 
 
 ## License
 
-[Add your license here]
+Copyright © 2026
 
-## Contributing
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-[Add contribution guidelines here]
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
