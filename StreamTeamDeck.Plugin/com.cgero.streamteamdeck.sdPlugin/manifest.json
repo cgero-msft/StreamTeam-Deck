@@ -1,0 +1,69 @@
+{
+  "SDKVersion": 2,
+  "Author": "cgero-msft",
+  "Name": "StreamTeam Deck",
+  "Description": "Control Microsoft Teams meetings with live status on your keys - mute, camera, raise hand, and hang up. Works via Windows UI Automation, no Teams API required.",
+  "Icon": "images/plugin",
+  "Category": "StreamTeam Deck",
+  "CategoryIcon": "images/category",
+  "URL": "https://github.com/cgero-msft/StreamTeam-Deck",
+  "Version": "2.0.0",
+  "CodePath": "StreamTeamDeck.Plugin.exe",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Software": {
+    "MinimumVersion": "6.4"
+  },
+  "Actions": [
+    {
+      "UUID": "com.cgero.streamteamdeck.mute",
+      "Name": "Toggle Mute",
+      "Tooltip": "Toggle your Teams microphone. The key shows your live mute state.",
+      "Icon": "images/mic",
+      "DisableAutomaticStates": true,
+      "SupportedInMultiActions": true,
+      "States": [
+        { "Image": "images/mic", "Name": "Unmuted" },
+        { "Image": "images/mic-muted", "Name": "Muted" }
+      ]
+    },
+    {
+      "UUID": "com.cgero.streamteamdeck.camera",
+      "Name": "Toggle Camera",
+      "Tooltip": "Toggle your Teams camera. The key shows your live camera state.",
+      "Icon": "images/camera",
+      "DisableAutomaticStates": true,
+      "SupportedInMultiActions": true,
+      "States": [
+        { "Image": "images/camera", "Name": "Camera on" },
+        { "Image": "images/camera-off", "Name": "Camera off" }
+      ]
+    },
+    {
+      "UUID": "com.cgero.streamteamdeck.hand",
+      "Name": "Raise Hand",
+      "Tooltip": "Raise or lower your hand in the meeting.",
+      "Icon": "images/hand",
+      "DisableAutomaticStates": true,
+      "SupportedInMultiActions": true,
+      "States": [
+        { "Image": "images/hand", "Name": "Lowered" },
+        { "Image": "images/hand-raised", "Name": "Raised" }
+      ]
+    },
+    {
+      "UUID": "com.cgero.streamteamdeck.hangup",
+      "Name": "Hang Up",
+      "Tooltip": "Leave the current Teams meeting.",
+      "Icon": "images/hangup",
+      "SupportedInMultiActions": true,
+      "States": [
+        { "Image": "images/hangup" }
+      ]
+    }
+  ]
+}
