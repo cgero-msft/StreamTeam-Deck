@@ -11,21 +11,28 @@ internal static class ActionImages
     private const string Background = "#1E2530";
     private const string DisabledInk = "#4A5261";
 
+    private const string MicPath =
+        "M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z";
+    private const string CameraPath =
+        "M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z";
+    private const string HangUpPath =
+        "M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.7l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.73-1.68-1.36-2.66-1.85-.33-.16-.56-.51-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z";
+
     private static string DataUri(string innerSvg)
     {
         var svg = $"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144"><rect width="144" height="144" rx="24" fill="{Background}"/>{innerSvg}</svg>""";
         return "data:image/svg+xml;base64," + Convert.ToBase64String(Encoding.UTF8.GetBytes(svg));
     }
 
-    public static readonly string MuteDisabled = DataUri(
-        $"""<rect x="58" y="30" width="28" height="52" rx="14" fill="{DisabledInk}"/><path d="M46 66v8a26 26 0 0 0 52 0v-8" fill="none" stroke="{DisabledInk}" stroke-width="8" stroke-linecap="round"/><line x1="72" y1="100" x2="72" y2="112" stroke="{DisabledInk}" stroke-width="8" stroke-linecap="round"/><line x1="56" y1="112" x2="88" y2="112" stroke="{DisabledInk}" stroke-width="8" stroke-linecap="round"/>""");
+    private static string CenteredIcon(string path, double scale, double centerY = 11.5) =>
+        $"""<path transform="translate(72,72) scale({scale}) translate(-12,-{centerY})" fill="{DisabledInk}" d="{path}"/>""";
 
-    public static readonly string CameraDisabled = DataUri(
-        $"""<rect x="28" y="48" width="58" height="48" rx="10" fill="{DisabledInk}"/><path d="M92 62 L116 48 v48 L92 82 Z" fill="{DisabledInk}"/>""");
+    public static readonly string MuteDisabled = DataUri(CenteredIcon(MicPath, 4.2));
 
-    public static readonly string HangUpDisabled = DataUri(
-        $"""<path d="M30 88c0-18 84-18 84 0l-5 12c-2 4-7 5-11 3l-11-6c-6-3-30-3-36 0l-11 6c-4 2-9 1-11-3Z" fill="{DisabledInk}"/>""");
+    public static readonly string CameraDisabled = DataUri(CenteredIcon(CameraPath, 4.2, centerY: 12));
+
+    public static readonly string HangUpDisabled = DataUri(CenteredIcon(HangUpPath, 4.6, centerY: 11.3));
 
     public static readonly string HandDisabled = DataUri(
-        $"""<rect x="50" y="36" width="10" height="42" rx="5" fill="{DisabledInk}"/><rect x="64" y="28" width="10" height="50" rx="5" fill="{DisabledInk}"/><rect x="78" y="32" width="10" height="46" rx="5" fill="{DisabledInk}"/><path d="M50 70h38v14a24 24 0 0 1-24 24h-2a22 22 0 0 1-22-22v-8Z" fill="{DisabledInk}"/>""");
+        $"""<g fill="{DisabledInk}"><rect x="42" y="44" width="12" height="40" rx="6"/><rect x="58" y="34" width="12" height="50" rx="6"/><rect x="74" y="38" width="12" height="46" rx="6"/><rect x="90" y="48" width="12" height="36" rx="6"/><path d="M42 74h60v12a28 28 0 0 1-28 28h-6a26 26 0 0 1-26-26Z"/></g>""");
 }

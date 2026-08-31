@@ -1,6 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28">
-  <rect x="11" y="3" width="6" height="11" rx="3" fill="#DFDFDF"/>
-  <path d="M8 11v2a6 6 0 0 0 12 0v-2" fill="none" stroke="#DFDFDF" stroke-width="2" stroke-linecap="round"/>
-  <line x1="14" y1="19" x2="14" y2="23" stroke="#DFDFDF" stroke-width="2" stroke-linecap="round"/>
-  <line x1="10" y1="23" x2="18" y2="23" stroke="#DFDFDF" stroke-width="2" stroke-linecap="round"/>
+  <path transform="translate(14,14) scale(1.1) translate(-12,-11.5)" fill="#DFDFDF" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
 </svg>
