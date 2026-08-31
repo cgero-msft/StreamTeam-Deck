@@ -46,6 +46,12 @@ public sealed class TeamsController : IDisposable
             }
         }
 
+        // Only fall back to keystrokes when a meeting window exists to receive them;
+        // otherwise they would land in whatever app is focused.
+        if (session == null)
+        {
+            throw new InvalidOperationException("No active Teams meeting found");
+        }
         SendHotkey(kind, session);
     }
 
@@ -55,17 +61,18 @@ public sealed class TeamsController : IDisposable
         catch { return TeamsCallState.NoCall; }
     }
 
-    private static void SendHotkey(TeamsButtonKind kind, TeamsCallSession? session)
+    private static void SendHotkey(TeamsButtonKind kind, TeamsCallSession session)
     {
         // Teams shortcuts need the meeting window focused; raise it briefly and restore.
-        var previous = GetForegroundWindow();
-        var teamsWindow = session?.WindowHandle ?? IntPtr.Zero;
-        if (teamsWindow != IntPtr.Zero)
+        var teamsWindow = session.WindowHandle;
+        if (teamsWindow == IntPtr.Zero)
         {
-            SetForegroundWindow(teamsWindow);
+            throw new InvalidOperationException("Teams meeting window is not available for the hotkey fallback");
         }
+        var previous = GetForegroundWindow();
+        SetForegroundWindow(teamsWindow);
         SendKeys.SendWait(Hotkeys[kind]);
-        if (teamsWindow != IntPtr.Zero && previous != IntPtr.Zero)
+        if (previous != IntPtr.Zero)
         {
             SetForegroundWindow(previous);
         }

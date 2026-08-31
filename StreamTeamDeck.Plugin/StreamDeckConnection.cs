@@ -29,25 +29,53 @@ internal sealed class StreamDeckConnection : IDisposable
         }
     }
 
-    /// <summary>Returns the next message, or null when the socket closes.</summary>
+    /// <summary>
+    /// Returns the next parseable message, or null when the socket closes. Malformed or
+    /// oversized messages are skipped rather than tearing down the connection.
+    /// </summary>
     public async Task<JsonDocument?> ReceiveAsync(CancellationToken ct)
     {
+        const int MaxMessageBytes = 4 * 1024 * 1024;
         var buffer = new byte[64 * 1024];
-        using var message = new MemoryStream();
         while (true)
         {
-            var result = await _socket.ReceiveAsync(buffer, ct);
-            if (result.MessageType == WebSocketMessageType.Close)
+            using var message = new MemoryStream();
+            var oversized = false;
+            while (true)
             {
-                return null;
+                var result = await _socket.ReceiveAsync(buffer, ct);
+                if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    return null;
+                }
+                if (message.Length + result.Count > MaxMessageBytes)
+                {
+                    oversized = true; // keep draining frames until the message ends
+                }
+                else
+                {
+                    message.Write(buffer, 0, result.Count);
+                }
+                if (result.EndOfMessage)
+                {
+                    break;
+                }
             }
-            message.Write(buffer, 0, result.Count);
-            if (result.EndOfMessage)
+
+            if (oversized || message.Length == 0)
             {
-                break;
+                Log.Write(oversized ? "Skipped oversized message" : "Skipped empty message");
+                continue;
+            }
+            try
+            {
+                return JsonDocument.Parse(message.ToArray());
+            }
+            catch (JsonException ex)
+            {
+                Log.Write($"Skipped malformed message: {ex.Message}");
             }
         }
-        return message.Length == 0 ? null : JsonDocument.Parse(message.ToArray());
     }
 
     public void Dispose()

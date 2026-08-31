@@ -18,6 +18,7 @@ internal sealed class PluginHost : IDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly object _contextLock = new();
     private readonly Dictionary<string, string> _actionByContext = new();
+    private readonly SemaphoreSlim _pushLock = new(1, 1);
 
     public PluginHost(PluginArgs args) => _args = args;
 
@@ -27,7 +28,7 @@ internal sealed class PluginHost : IDisposable
         await _connection.ConnectAsync(_args.Port, _args.PluginUuid, _args.RegisterEvent, ct);
         Log.Write("Connected to Stream Deck");
 
-        _watcher.StateChanged += state => _ = PushStateToAllAsync(state);
+        _watcher.StateChanged += state => { _ = PushStateToAllAsync(); };
         _watcher.Start();
 
         while (!ct.IsCancellationRequested)
@@ -127,16 +128,34 @@ internal sealed class PluginHost : IDisposable
         });
     }
 
-    private async Task PushStateToAllAsync(TeamsCallState state)
+    private async Task PushStateToAllAsync()
     {
-        KeyValuePair<string, string>[] contexts;
-        lock (_contextLock)
+        // Serialize full pushes so rapid state churn can't interleave updates out of
+        // order; each push re-reads Current, so the latest state always wins.
+        try
         {
-            contexts = _actionByContext.ToArray();
+            await _pushLock.WaitAsync(_cts.Token);
         }
-        foreach (var (context, action) in contexts)
+        catch (OperationCanceledException)
         {
-            await PushStateAsync(action, context, state);
+            return;
+        }
+        try
+        {
+            var state = _watcher.Current;
+            KeyValuePair<string, string>[] contexts;
+            lock (_contextLock)
+            {
+                contexts = _actionByContext.ToArray();
+            }
+            foreach (var (context, action) in contexts)
+            {
+                await PushStateAsync(action, context, state);
+            }
+        }
+        finally
+        {
+            _pushLock.Release();
         }
     }
 
@@ -194,5 +213,6 @@ internal sealed class PluginHost : IDisposable
         _watcher.Dispose();
         _connection.Dispose();
         _cts.Dispose();
+        _pushLock.Dispose();
     }
 }

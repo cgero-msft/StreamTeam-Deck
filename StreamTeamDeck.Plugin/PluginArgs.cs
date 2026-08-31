@@ -19,7 +19,11 @@ public sealed record PluginArgs(int Port, string PluginUuid, string RegisterEven
         {
             throw new ArgumentException("Missing required Stream Deck arguments (-port, -pluginUUID, -registerEvent)");
         }
+        if (!int.TryParse(port, out var portNumber) || portNumber is <= 0 or > 65535)
+        {
+            throw new ArgumentException($"Invalid -port value '{port}' (expected 1-65535)");
+        }
 
-        return new PluginArgs(int.Parse(port), uuid, registerEvent);
+        return new PluginArgs(portNumber, uuid, registerEvent);
     }
 }
