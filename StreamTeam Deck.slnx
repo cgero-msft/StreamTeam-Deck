@@ -1,3 +1,5 @@
 <Solution>
   <Project Path="StreamTeam Deck/StreamTeam Deck.csproj" />
+  <Project Path="StreamTeamDeck.Core/StreamTeamDeck.Core.csproj" />
+  <Project Path="StreamTeamDeck.Plugin/StreamTeamDeck.Plugin.csproj" />
 </Solution>

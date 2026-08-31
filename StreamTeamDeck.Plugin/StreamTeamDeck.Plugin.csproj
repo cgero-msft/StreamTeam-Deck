@@ -3,8 +3,8 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-    <RootNamespace>StreamTeam_Deck</RootNamespace>
-    <AssemblyName>StreamTeamDeck</AssemblyName>
+    <RootNamespace>StreamTeamDeck.Plugin</RootNamespace>
+    <AssemblyName>StreamTeamDeck.Plugin</AssemblyName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>

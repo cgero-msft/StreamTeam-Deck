@@ -1,86 +1,84 @@
 # StreamTeam Deck
 
-A lightweight command-line utility that integrates Microsoft Teams meeting controls with Elgato Stream Deck. Control your Teams meetings with physical buttons - mute/unmute, toggle camera, raise hand, and hang up calls.
+Control Microsoft Teams meetings from an Elgato Stream Deck — mute/unmute, toggle camera, raise hand, and hang up — with **live status on the keys**, no Teams API required. Works even when Teams is not the focused window.
 
-## Features
+Two ways to use it:
 
-- **Toggle Mute/Unmute** - Quickly mute or unmute your microphone
-- **Toggle Camera** - Turn your camera on or off
-- **Raise/Lower Hand** - Raise or lower your hand in meetings
-- **Hang Up** - End the current call
-- **Silent Operation** - Runs in the background without showing a command prompt window
-- **Dual Approach** - Uses UI Automation with keyboard shortcut fallback for reliability
+1. **Stream Deck plugin (recommended)** — real plugin actions whose keys show your current state: a red slashed mic when muted, a red slashed camera when video is off, an amber hand when raised. Keys grey out when you're not in a call.
+2. **Command-line utility** — a lightweight exe you can wire to Stream Deck "System → Open" actions (or anything else). Fire-and-forget, no status feedback.
+
+## How It Works
+
+Both use Windows **UI Automation** (via FlaUI) — the same accessibility layer screen readers use:
+
+- **Actions**: finds the meeting window's control buttons (matching stable AutomationIds first, English labels as fallback) and invokes them directly — no window focus change, no keystrokes. If the button can't be found, falls back to Teams keyboard shortcuts, briefly focusing the meeting window and restoring your previous window.
+- **Status**: Teams buttons advertise their *action* ("Unmute", "Turn camera on"), which is the inverse of the current state. The plugin polls the cached button elements (~750 ms while in a call, 3 s scan while idle) and pushes state changes to the keys — including changes you make inside Teams itself.
+- Meetings in popped-out windows are found too; every top-level Teams window is checked.
+
+> **Note**: State detection currently relies on Teams' English UI labels (with AutomationIds as the primary, language-independent match). If your Teams UI is in another language and AutomationIds don't match, buttons still work but state may show as unknown.
 
 ## Prerequisites
 
 - Windows 10/11
-- .NET 10 Runtime
-- Microsoft Teams (desktop app)
-- Elgato Stream Deck
+- .NET 10 Runtime (SDK to build)
+- Microsoft Teams (new desktop app)
+- Elgato Stream Deck with Stream Deck software 6.4+
 
-## Building the Project
+## Stream Deck Plugin
 
-1. Open the solution in Visual Studio 2022 or later
-2. Build the solution (`Ctrl+Shift+B`)
-3. The executable will be in `StreamTeam Deck\bin\Debug\net10.0-windows\StreamTeamDeck.exe`
+### Build & install
 
-For production use, build in Release mode:
-- `StreamTeam Deck\bin\Release\net10.0-windows\StreamTeamDeck.exe`
+```powershell
+.\build-plugin.ps1 -Install
+```
 
-## Available Commands
+This publishes the plugin, assembles `dist\com.cgero.streamteamdeck.sdPlugin`, copies it to `%APPDATA%\Elgato\StreamDeck\Plugins`, and restarts the Stream Deck app. You'll find a **StreamTeam Deck** category with four actions: Toggle Mute, Toggle Camera, Raise Hand, Hang Up — just drag them onto keys.
 
-Run the executable with one of these commands:
+### Key behavior
+
+| Key | Not in call | In call |
+|---|---|---|
+| Toggle Mute | greyed out | white mic = live, red slashed mic = muted |
+| Toggle Camera | greyed out | white camera = on, red slashed camera = off |
+| Raise Hand | greyed out | white hand = lowered, amber hand = raised |
+| Hang Up | greyed out | red hang-up |
+
+Pressing a key while not in a call shows the Stream Deck alert triangle. Troubleshooting: the plugin logs to `logs\plugin.log` inside its installed folder.
+
+## Command-Line Utility
+
+Build the solution (Visual Studio 2022+ or `dotnet build`), then:
 
 ```cmd
 StreamTeamDeck.exe mute      # Toggle mute/unmute
 StreamTeamDeck.exe camera    # Toggle camera on/off
 StreamTeamDeck.exe hand      # Raise/lower hand
 StreamTeamDeck.exe hangup    # Hang up the call
+StreamTeamDeck.exe status    # Print call state as JSON, e.g. {"inCall":true,"muted":false,...}
+StreamTeamDeck.exe watch     # Stream call-state changes as JSON lines (Ctrl+C to stop)
 ```
 
-## Stream Deck Configuration
+For Stream Deck without the plugin, drag a **System → Open** action to a key with:
 
-### Method 1: Using "System → Open" Action
+```
+"C:\path\to\StreamTeamDeck.exe" mute
+```
 
-1. Open Stream Deck software
-2. Drag **"System → Open"** action to a button
-3. In the **App/File** field, enter the full command:
-   ```
-   "C:\path\to\StreamTeamDeck.exe" mute
-   ```
-   (Replace `mute` with `camera`, `hand`, or `hangup` for other buttons)
+(The exe is a windowed app, so `status`/`watch` output only appears when piped, e.g. `.\StreamTeamDeck.exe status | more`.)
 
+## Project Layout
 
-## How It Works
-
-The application uses a two-tier approach:
-
-1. **UI Automation (Primary)**: Attempts to find and click the Teams meeting control buttons using FlaUI
-2. **Keyboard Shortcuts (Fallback)**: If UI Automation fails, uses Teams global hotkeys:
-   - Mute: `Ctrl+Shift+M`
-   - Camera: `Ctrl+Shift+O`
-   - Hand: `Ctrl+Shift+K`
-   - Hang Up: `Ctrl+Shift+H`
-
-The app includes retry logic and restores focus to the previously active window after executing actions.
-
-## Testing
-
-1. Join or start a Teams meeting
-2. Run commands from PowerShell to test:
-   ```powershell
-   cd "StreamTeam Deck\bin\Debug\net10.0-windows"
-   .\StreamTeamDeck.exe mute
-   ```
-3. Verify the action occurs in Teams
-
+- `StreamTeamDeck.Core` — shared library: window/button discovery, state reading, state watcher, action invocation
+- `StreamTeam Deck` — the CLI (`StreamTeamDeck.exe`)
+- `StreamTeamDeck.Plugin` — the Stream Deck plugin host (WebSocket client for Elgato's plugin protocol) plus the `.sdPlugin` manifest and icons
+- `build-plugin.ps1` — builds/installs the plugin
 
 ## Technical Details
 
 - **Framework**: .NET 10
 - **UI Automation**: FlaUI.UIA3
-- **P/Invoke**: user32.dll for window management
-- **Retry Logic**: 3 attempts with 500ms delay
+- **Keyboard fallback**: Teams shortcuts (`Ctrl+Shift+M` / `O` / `K` / `H`) with focus save/restore via user32.dll
+- **Stream Deck**: Elgato SDK v2 WebSocket protocol, implemented directly (no plugin framework dependency)
 
 ## License
 
@@ -91,4 +89,3 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
